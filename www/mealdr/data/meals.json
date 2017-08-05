@@ -1,0 +1,37 @@
+{
+    "Chili" : 
+    {
+        "created" : "r.p.ivie@gmail.com",
+        "ingredients" : [
+            {"name":"Can of Black Beans", "amount":"1"},
+            {"name":"Cup of Diced Raw Onion", "amount":"1/4"},
+            {"name":"Can of Tomato Sauce", "amount":"1"},
+            {"name":"Can of Green Chilis", "amount":"1"}
+        ],
+        "instructions" : [
+            "Saute onions in medium sized pot.",
+            "Remove onions from heat.",
+            "Drain liquid from can of black beans.",
+            "Rinse beans.",
+            "Spill beans into pot.",
+            "Spill tomato sause into pot.",
+            "Spill green chilis into pot.",
+            "Mix ingredients in pot.",
+            "Bring mixed ingredients to a boil."
+        ],
+        "image" : "./images/chili.png"
+    },
+    "Grilled Cheese" : 
+    {
+        "created" : "r.p.ivie@gmail.com",
+        "ingredients" : [
+            {"name":"Slice of Bread", "amount":"2"},
+            {"name":"Slices of Cheese", "amount":"6"}
+        ],
+        "instructions" : [
+            "Evenly place cheese between slices of bread.",
+            "Lightly brown each side of sandwhich in a frying pan."
+        ],
+        "image" : "./images/grilledCheese.png"
+    }
+}

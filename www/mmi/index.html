@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	  <link rel="shortcut icon" type="image/png" href="/icon.png"/>
+	  <title>Mother May I</title>
+
+		<!-- JQUERY -->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+		<script src="//code.jquery.com/ui/1.10.4/jquery-ui.js"></script>
+
+		<!-- BOOTSTRAP -->
+		<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+		<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+		
+</head>
+<body>
+	
+    <!--custom css-->
+    <style>
+        #chat {
+            margin-top: 15px;
+        }
+
+        .footer {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            text-align: center;
+        }
+
+        .request {
+            text-align: left;
+            margin: 15px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .response {
+            text-align: left;
+            margin: 15px;
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        .req-row {
+            display: none;
+        }
+
+        .res-row {
+            display: none;
+        }
+
+        .center {
+            width:100px;
+            float:left;
+            text-align:center;
+        }
+
+        #suggestions {
+            text-align: center;
+            position: absolute;
+            font-size: 14px;
+        }
+
+        .suggestion:hover {
+            font-weight: bold;
+            cursor: pointer;
+        }
+		
+    </style>
+	
+    <!--custom script-->
+    <script type="text/javascript">
+        $(function() {
+            $(".word-box").keypress(function(event) {
+                if(event.which == 13) {
+                    getAnswer();
+                }
+            });
+            $("#addon3").click(function(event) {
+                getAnswer();
+            });
+            $(document).click(function(event) {
+                var target = $(event.target);
+                //close suggestions box
+                if (target.attr("id") != "verbBox" && target.attr("id") != "adverbBox" && target.attr("id") != "nounBox") {
+                    //clear suggestions
+                    $("#suggestions").animate({height: 0}, 'fast');
+                    $("#suggestions").text("");
+                } else {
+                    target.val("");
+                }
+            });
+            var chatId = 0;
+            function getAnswer() {
+                if ($("#verbBox").val().length>0 && $("#adverbBox").val().length>0 && $("#nounBox").val().length>0) {
+                    //write request
+					var requestString = $("#adverbBox").val()+" "+$("#verbBox").val()+" the "+$("#nounBox").val();
+                    $("#chat").prepend(
+                            "<div class=\"row req-row\" id=\"req"+chatId+"\">"
+                            +"<div class=\"col-xs-10 col-xs-push-2 col-sm-5 col-sm-push-5 col-md-5 col-md-push-5\">"
+							+	"<div class=\"request well\">"
+                            +		"<span>Mother may I "+requestString+"?</span>"
+                            +	"</div>"
+							+"</div>"
+                            +"</div>");
+                    $("#req"+chatId).animate({height: "show"});
+                    //decide
+                    var rand = Math.floor(Math.random() * 10);
+                    //write response
+					answer = ((rand<4)?"Yes.":"No.");
+					targetEmail = "r.p.ivie@live.com";
+					requestString = requestString.replace(/\s/g, ",");
+					confirmString = "{"+requestString+","+answer+"}";
+					emailBody = "%0D%0ADo%20not%20change%20anything%20above%20here.%0D%0A%0D%0AThank%20you%20for%20helping!%0D%0A%0D%0A";
+					$("#chat").prepend(
+							"<div class=\"row res-row\" id=\"res"+chatId+"\">"
+							+"<div class=\"col-xs-10 col-sm-5 col-sm-push-2 col-md-5\">"
+							+	"<div class=\"response well\">"
+							+		"<span>"+answer+"</span>"
+							+		"<a href=\"mailto:"+targetEmail+"?subject=mmi&body="+confirmString+emailBody+"\">"
+							+			"<span class=\"glyphicon glyphicon-ok\"> </span>"
+							+		"</a>"
+							+	"</div>"
+							+"</div>"
+							+"</div>");
+                    $("#res"+chatId).delay(1000).animate({height: "show"});
+                }
+            }
+        });
+        function suggestWord(type) {
+            //open word memory
+            $.getJSON("game.json", function(words){
+                //get verbs
+                wData = words[type];
+                //clear suggestions
+                $("#suggestions").text("");
+                //get 5 matches
+                for(var i=0, c=0; i<wData.length && c<10; i++){
+                    //get word
+                    var word = wData[i];
+                    //add word if word contains value
+                    if(word.indexOf($("#"+type+"Box").val())!=-1) {
+                        //add suggestion
+                        $("#suggestions").animate({height: 20}, 'fast');
+                        $("#suggestions").append("<span class=\"suggestion\" onclick=\"selectWord('"+type+"', '"+word+"')\">"+word+", </span>");
+                        //increment count
+                        c++;
+                    }
+                }
+                //add trailing elipses
+                $("#suggestions").append("...");
+            },"json");
+        }
+        function selectWord(type, word) {
+            $("#"+type+"Box").val(word);
+        }
+    </script>
+
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="index.html">
+                    <!--<img class="hidden-xs" alt="Mother May I" src="icon.png">-->
+                    <span>Mother May I</span>
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <form class="navbar-form navbar-right">
+                    <div class="form-group input-group" role="">
+                        <input
+                                type="text"
+                                onclick="suggestWord('adverb')"
+                                onkeypress="suggestWord('adverb')"
+                                class="form-control word-box"
+                                placeholder="adverb"
+                                id="adverbBox"
+                                aria-describedby="addon1">
+                        <span class="hidden-xs input-group-addon" id="addon1"> </span>
+                        <input
+                                type="text"
+                                onclick="suggestWord('verb')"
+                                onkeypress="suggestWord('verb')"
+                                class="form-control word-box"
+                                placeholder="verb"
+                                id="verbBox"
+                                aria-describedby="addon1 addon2">
+                        <span class="hidden-xs input-group-addon" id="addon2"> the </span>
+                        <input
+                                type="text"
+                                onclick="suggestWord('noun')"
+                                onkeypress="suggestWord('noun')"
+                                class="form-control word-box"
+                                placeholder="noun"
+                                id="nounBox"
+                                aria-describedby="addon2 addon3">
+                        <span
+                                type="submit"
+                                class="input-group-addon btn btn-default"
+                                id="addon3">?</span>
+                    </div>
+                </form>
+            </div><!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->
+    </nav>
+    <div class="full-container">
+        <div class="row">
+            <div class="col-xs-12 col-sm-12 col-md-12" id="suggestions"></div>
+        </div>
+    </div>
+    <div class="container" id="chat"></div>
+    <footer class="footer">
+        <span>ANSWERS ARE NOT GUARENTEED TO BE CORRECT</span>
+    </div>
+</body>
+</html>
+

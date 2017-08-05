@@ -1,0 +1,494 @@
+<html>
+
+	<header>
+		<style>
+			html, body {
+				width:  100%;
+				height: 100%;
+				margin: 0px;
+			}
+			
+			#canvas, #preview {
+				position: absolute;
+				left: 0;
+				top: 0;
+			}
+			
+			#canvas {
+				background-color: rgba(248, 236, 194, .5);
+			}
+			
+			#commands, #commandsMore {
+				border-bottom: 1px black solid;
+				border-right: 1px black solid;
+				position: absolute;
+				top: 0;
+				left: 0;
+				padding: 0;
+			}
+			
+			.command {
+				display: block;
+				padding: 5;
+				margin: 0;
+			}
+			
+			.commandInput[type="submit"] {
+				width: 100px;
+			}
+			
+			.hidden {
+				display: none;
+			}
+			
+			#position {
+				display: none;
+				position: absolute;
+				top: 0;
+				left: 0;
+			}
+		</style>
+	</header>
+	
+	<body onresize="setupPage()">
+		
+		<canvas id="preview"></canvas>
+		
+		<canvas id="canvas"></canvas>
+		
+		<div id="position">
+			(<span id="positionX"></span>,<span id="positionY"></span>)
+		</div>
+		
+		<div id="commands">
+			<div id="showLine" class="command">
+				<input type="submit" onclick="showLine()" class="commandInput" value="Line"></input>
+			</div>
+			<div id="showArc" class="command">
+				<input type="submit" onclick="showArc()" class="commandInput" value="Arc"></input>
+			</div>
+			<div id="showText" class="command hidden">
+				<input type="submit" onclick="showText()" class="commandInput" value="Text"></input>
+			</div>
+			<div class="command">
+				<input type="submit" onclick="undo()" class="commandInput" value="Undo"></input>
+			</div>
+			<div class="command">
+				<input type="submit" onclick="redo()" class="commandInput" value="Redo"></input>
+			</div>
+			<div class="command">
+				<input type="submit" onclick="save()" class="commandInput" value="Save"></input>
+				<a class="commandInput" id="save" style="display:none;">save</a>
+			</div>
+			<div class="command">
+				<input type="submit" onclick="showOpen()"  class="commandInput" value="Open"></input>
+			</div>
+			<div class="command">
+				<input type="submit" onclick="reset()" class="commandInput" value="Reset"></input>
+			</div>
+		</div>
+		
+		<div id="commandsMore">
+			<div id="drawLine" class="command hidden">
+				<input type="submit" onclick="drawLine()" class="commandInput" value="Done"></input>
+				<input type="number" id="endYLine" placeholder="y2" class="commandInput"></input>
+				<input type="number" id="endXLine" placeholder="x2" class="commandInput"></input>
+				<input type="number" id="startYLine" placeholder="y1" class="commandInput"></input>
+				<input type="number" id="startXLine" placeholder="x1" class="commandInput"></input>
+			</div>
+			<div id="drawArc" class="command hidden">
+				<input type="submit" onclick="drawArc()" class="commandInput" value="Done"></input>
+				<input type="number" id="endRadiansCircle" min="0" max="2" placeholder="end" class="commandInput"></input>
+				<input type="number" id="startRadiansCircle" min="0" max="2" placeholder="start" class="commandInput"></input>
+				<input type="number" id="radiusCircle" placeholder="radius" class="commandInput"></input>
+				<input type="number" id="centerYCircle" placeholder="y" class="commandInput"></input>
+				<input type="number" id="centerXCircle" placeholder="x" class="commandInput"></input>
+			</div>
+			<div id="drawText"  class="command hidden">
+				<input type="submit" onclick="drawText()" class="commandInput" value="Done"></input>
+				<input type="number" id="leftXText" placeholder="x" class="commandInput"></input>
+				<input type="number" id="rightXText" placeholder="y" class="commandInput"></input>
+				<input type="number" id="sizeText" min="0" max="20" placeholder="size" class="commandInput"></input>
+				<input type="text" id="stringText" placeholder="text" class="commandInput"></input>
+			</div>
+			<div id="openDraft"  class="command hidden">
+				<input type="submit" onclick="cancelOpen()" class="commandInput" value="Cancel"></input>
+				<input type="file" id="file" class="commandInput"></input>
+			</div>
+		</div>
+		
+	</body>
+	
+	<script>
+		var c = document.getElementById("canvas");
+		var ctx = c.getContext("2d");
+		var p = document.getElementById("preview");
+		var ptx = p.getContext("2d");
+		var position = document.getElementById("position");
+		var positionX = document.getElementById("positionX");
+		var positionY = document.getElementById("positionY");
+		var mouseX = 0;
+		var mouseY = 0;
+		var canToggle = true;
+		var drawingLine = false;
+		var drawingArc = false;
+		var drawingText = false;
+		var startXLine = document.getElementById("startXLine");
+		var startYLine = document.getElementById("startYLine");
+		var endXLine = document.getElementById("endXLine");
+		var endYLine = document.getElementById("endYLine");
+		var centerXCircle = document.getElementById("centerXCircle");
+		var centerYCircle = document.getElementById("centerYCircle");
+		var radiusCircle = document.getElementById("radiusCircle");
+		var startRadiansCircle = document.getElementById("startRadiansCircle");
+		var endRadiansCircle = document.getElementById("endRadiansCircle");
+		var leftXText = document.getElementById("leftXText");
+		var rightXText = document.getElementById("rightXText");
+		var sizeText = document.getElementById("sizeText");
+		var stringText = document.getElementById("stringText");
+		
+		setupPage();
+		
+		function setupPage() {
+			//manipulate page dimensions
+			c.height = window.innerHeight;
+			c.width = window.innerWidth;
+			p.height = window.innerHeight;
+			p.width = window.innerWidth;
+			height = window.innerHeight;
+			width = window.innerWidth;
+			
+			//populate stack
+			var stack = sessionStorage.stack;
+			if (stack === "" || typeof stack === "undefined") {
+				sessionStorage.stack = JSON.stringify([]);
+			} else {
+				stack = JSON.parse(stack);
+				for(index in stack) {
+					var next = stack[index];
+					if (next.action === "drawLine") {//drawLine
+						//add line to canvas
+						ctx.moveTo(next.sx, next.sy);
+						ctx.lineTo(next.ex, next.ey);
+						ctx.stroke();
+					} else if (next.action === "drawArc") {//drawArc
+						//add arc to canvas
+						ctx.beginPath();
+						ctx.arc(next.cx, next.cy, next.r, next.sr, next.er);
+						ctx.stroke();
+					} else if (next.action === "drawText") {//drawText
+						//add text to canvas
+						ctx.font = sizeText + "px Arial";
+						ctx.fillText(next.s, next.l, next.r);
+					}
+				}
+			}
+			
+			//populate undone
+			var undone = sessionStorage.undone;
+			if (undone === "" || typeof undone === "undefined") {
+				sessionStorage.undone = JSON.stringify([]);
+			}
+		}
+		
+		function showOpen() {
+			toggleCommand("openDraft", "commands");
+			canToggle = false;
+		}
+		
+		function cancelOpen() {
+			canToggle = true;
+			toggleCommand("commands", "openDraft");
+		}
+		
+		document.getElementById("file").onchange = function() {
+			var files = this.files;
+			
+			//check if file is selected
+			if (files.length <= 0) {
+				return false;
+			}
+
+			//read file
+			var fr = new FileReader();
+			fr.onload = function(e) {
+				var result = JSON.parse(e.target.result);
+				sessionStorage.stack = result;
+				sessionStorage.undone = JSON.stringify([]);
+			}
+			fr.readAsText(files.item(0));
+			
+			//redraw page
+			window.location.href = "./";
+		}
+		
+		function showLine() {
+			drawingLine = true;
+			toggleCommand("drawLine", "commands");
+			canToggle = false;
+		}
+		
+		function drawLine() {
+			if (startXLine.value !== "" && startYLine.value !== "" && endXLine.value !== "" && endYLine.value !== "") {
+				//add line to canvas
+				ctx.moveTo(startXLine.value, startYLine.value);
+				ctx.lineTo(endXLine.value, endYLine.value);
+				ctx.stroke();
+				
+				//add line to stack
+				var stack = JSON.parse(sessionStorage.stack);
+				stack.push({"action":"drawLine", "sx":startXLine.value, "sy":startYLine.value, "ex":endXLine.value, "ey":endYLine.value});
+				sessionStorage.stack = JSON.stringify(stack);
+			}
+			
+			//toggle active
+			drawingLine = false;
+			canToggle = true;
+			toggleCommand("commands", "drawLine");
+			
+			//advance state
+			clearInputs();
+			sessionStorage.undone = JSON.stringify([]);
+		}
+		
+		function showArc() {
+			drawingArc = true;
+			toggleCommand("drawArc", "commands");
+			canToggle = false;
+		}
+		
+		function drawArc() {
+			if (centerXCircle.value !== "", centerYCircle.value !== "", radiusCircle.value !== "", startRadiansCircle.value !== "", endRadiansCircle.value !== "") {
+				//add arc to canvas
+				ctx.beginPath();
+				ctx.arc(centerXCircle.value, centerYCircle.value, radiusCircle.value, startRadiansCircle.value, endRadiansCircle.value);
+				ctx.stroke();
+				
+				//add line to stack
+				var stack = JSON.parse(sessionStorage.stack);
+				stack.push({"action":"drawArc", "cx":centerXCircle.value, "cy":centerYCircle.value, "r":radiusCircle.value, "sr":startRadiansCircle.value, "er":endRadiansCircle.value});
+				sessionStorage.stack = JSON.stringify(stack);
+			}
+			
+			//toggle active
+			drawingArc = false;
+			canToggle = true;
+			toggleCommand("commands", "drawArc");
+			
+			//advance state
+			clearInputs();
+			sessionStorage.undone = JSON.stringify([]);
+		}
+		
+		function showText() {
+			drawingText = true;
+			toggleCommand("drawText", "commands");
+			canToggle = false;
+		}
+		
+		function drawText() {
+			if (stringText.value !== "" && leftXText.value !== "" && rightXText.value !== "") {
+				//add text to canvas
+				ctx.font = sizeText + "px Arial";
+				ctx.fillText(stringText.value, leftXText.value, rightXText.value);
+				
+				//add text to stack
+				var stack = JSON.parse(sessionStorage.stack);
+				stack.push({"action":"drawText", "s":stringText.value, "l":leftXText.value, "r":rightXText.value});
+				sessionStorage.stack = JSON.stringify(stack);
+			}
+			
+			//toggle active
+			drawingText = false;
+			canToggle = true;
+			toggleCommand("commands", "drawText");
+			
+			//advance state
+			clearInputs();
+			sessionStorage.undone = JSON.stringify([]);
+		}
+		
+		function clearInputs() {
+			startXLine.value = "";
+			startYLine.value = "";
+			endXLine.value = "";
+			endYLine.value = "";
+			centerXCircle.value = "";
+			centerYCircle.value = "";
+			radiusCircle.value = "";
+			startRadiansCircle.value = "";
+			endRadiansCircle.value = "";
+			stringText.value = "";
+			leftXText.value = "";
+			rightXText.value = "";
+		}
+		
+		function toggleCommand(showing, hiding) {
+			if (canToggle) {//toggle
+				document.getElementById(showing).className = "command";
+				document.getElementById(hiding).className = "command hidden";
+			} else {//refuse toggle
+				alert("You mush finish your current action.");
+			}
+		}
+		
+		document.addEventListener("keyup", function(e) {
+			if (e.ctrlKey && e.shiftKey && e.keyCode == 76) {//ctrl-l
+				showLine();
+			} else if (e.ctrlKey && e.shiftKey && e.keyCode === 65) {//ctrl-a
+				showArc();
+			} else if (e.ctrlKey && e.shiftKey && e.keyCode === 88) {//ctrl-t
+				showText();
+			} else if (e.keyCode === 27) {//esc
+				clearInputs();
+				ptx.clearRect(0, 0, p.width, p.height);
+			} else if (e.keyCode === 13) {//enter
+			}
+			e.preventDefault();
+		});
+		
+		//draw line based on preview
+		c.addEventListener("click", function(e) {
+			//add click selection
+			if (drawingLine)  {//draw line
+				if (startXLine.value === "" || startYLine.value === "") {
+					startXLine.value = mouseX;
+					startYLine.value = mouseY;
+				} else if (endXLine.value === "" || endYLine.value === "") {
+					endXLine.value = mouseX;
+					endYLine.value = mouseY;
+					//finished
+					drawLine();
+				}
+			} else if (drawingArc) {//draw arc
+				var xAngle = mouseX - centerXCircle.value;
+				var yAngle = mouseY - centerYCircle.value;
+				if (centerXCircle.value === "" || centerYCircle.value === "") {
+					centerXCircle.value = mouseX;
+					centerYCircle.value = mouseY;
+				} else if (radiusCircle.value === "" || startRadiansCircle === "") {
+					radiusCircle.value = Math.sqrt( (mouseX - centerXCircle.value) * (mouseX - centerXCircle.value) + (mouseY - centerYCircle.value) * (mouseY - centerYCircle.value) );
+					startRadiansCircle.value = Math.atan2(yAngle, xAngle);
+				} else if (endRadiansCircle.value === "") {
+					endRadiansCircle.value = Math.atan2(yAngle, xAngle);
+					//finished
+					drawArc();
+				}
+			} else if (drawingText) {
+			}
+		});
+		
+		//move the cursor text
+		function movePosition() {
+			position.style.display = "block";
+				
+			//adjust position
+			var positionWidth = position.offsetWidth;
+			var positionHeight = position.offsetHeight;
+			
+			if (width - positionWidth < mouseX + 10) {
+				position.style.left = "auto";
+				var newRight = (width - mouseX) - 10;
+				position.style.right = (newRight <= 0)  ? 1 : newRight;
+			} else {
+				position.style.right = "auto";
+				position.style.left = mouseX + 10;
+			}
+			
+			if (height - positionHeight < mouseY + 20) {
+				position.style.top = "auto";
+				var newBottom = (height - mouseY) - 20;
+				position.style.bottom = (newBottom <= 0) ? 1 : newBottom;
+			} else {
+				position.style.bottom = "auto";
+				position.style.top = mouseY + 20;
+			}
+			
+			positionX.innerHTML = mouseX;
+			positionY.innerHTML = mouseY;
+		}
+		
+		//handle previews
+		c.addEventListener('mousemove', function(e){
+			//get mouse position
+			mouseX = e.pageX;
+			mouseY = e.pageY;
+			
+			//clear preview
+			ptx.clearRect(0, 0, p.width, p.height);
+			
+			if (drawingLine) {//draw line preview
+				if (!(startXLine.value === "" || startYLine.value === "") 
+						&& (endXLine.value === "" || endYLine.value === "")) {
+					//draw preview
+					ptx.beginPath();
+					ptx.moveTo(startXLine.value, startYLine.value);
+					ptx.lineTo(mouseX, mouseY);
+					ptx.stroke();
+					ptx.closePath();
+				}
+			} else if (drawingArc) {//draw arc preview
+				if (centerXCircle.value === "" || centerYCircle.value === "") {
+					//do nothing
+				} else if (radiusCircle.value === "" || startRadiansCircle === "") {
+					//draw preview
+					var radiusPreview = Math.sqrt( (mouseX - centerXCircle.value) * (mouseX - centerXCircle.value) + (mouseY - centerYCircle.value) * (mouseY - centerYCircle.value) );
+					ptx.beginPath();
+					ptx.arc(centerXCircle.value, centerYCircle.value, radiusPreview, 0, 2*Math.PI);
+					ptx.stroke();
+					ptx.closePath();
+				} else if (endRadiansCircle.value === "") {
+					//draw preview
+					var xAngle = mouseX - centerXCircle.value;
+					var yAngle = mouseY - centerYCircle.value;
+					var endRadiansPreview = Math.atan2(yAngle, xAngle);
+					ptx.beginPath();
+					ptx.arc(centerXCircle.value, centerYCircle.value, radiusCircle.value, startRadiansCircle.value, endRadiansPreview);
+					ptx.stroke();
+					ptx.closePath();
+				}
+				
+			} else if (drawingText) {//draw text preview
+				
+			}
+			
+			movePosition();
+		});
+		
+		function undo() {
+			var stack = JSON.parse(sessionStorage.stack);
+			var undone = JSON.parse(sessionStorage.undone);
+			if (stack.length === 0) { return; }
+			undone.push(stack.pop());
+			sessionStorage.stack = JSON.stringify(stack);
+			sessionStorage.undone = JSON.stringify(undone);
+			window.location.href = "./";
+		}
+		
+		function redo() {
+			var stack = JSON.parse(sessionStorage.stack);
+			var undone = JSON.parse(sessionStorage.undone);
+			if (undone.length === 0) { return; }
+			stack.push(undone.pop());
+			sessionStorage.stack = JSON.stringify(stack);
+			sessionStorage.undone = JSON.stringify(undone);
+			window.location.href = "./";
+		}
+		
+		function save() {
+			//setup save
+			var data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(sessionStorage.stack));
+			var save = document.getElementById("save");
+			save.setAttribute("href", data);
+			save.setAttribute("download", "draft.json");
+			save.click();
+		}
+		
+		function reset() {
+			sessionStorage.stack = JSON.stringify([]);
+			sessionStorage.undone = JSON.stringify([]);
+			window.location.href = "./";
+		}
+	</script>
+	
+</html>

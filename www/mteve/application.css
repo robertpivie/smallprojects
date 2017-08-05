@@ -1,0 +1,173 @@
+/* JQUERY UI */
+
+.ui-helper-hidden-accessible {
+	display: none;
+}
+
+.ui-menu {
+	background-color: #e7e7e7;
+	padding: 6px 12px 6px 12px;
+	border: 1px solid #ccc;
+	margin: 0;
+	list-style: none;
+	overflow-x: hidden;
+	overflow-y: scroll;
+	height: 200px;
+	z-index: 40000;
+}
+
+.ui-menu-item {
+	border-bottom: 1px solid #ccc;
+}
+
+.ui-menu-item>a {
+	text-decoration: none;
+	color: #777;
+	cursor: pointer;
+}
+
+/* CUSTOM */
+
+#marginTableContainer {
+    overflow-x: scroll;
+	min-height: 400px;
+}
+
+#sellOrderTableContainer {
+    overflow-x: scroll;
+	min-height: 400px;
+}
+
+#buyOrderTableContainer {
+    overflow-x: scroll;
+	min-height: 400px;
+}
+
+#charts.sticky {
+    position: fixed;
+    top: 0;
+}
+
+#overlay {
+    background-color: rgba(1, 1, 1, 0.7);
+    bottom: 0;
+    left: 0;
+    position: fixed;
+    right: 0;
+    top: 0;
+	display:none;
+}
+
+#route {
+    height: 200px;
+    overflow-y: scroll;
+}
+
+body {
+    background-image: url("background.jpg");
+    /*background-color: #222;*/
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-size: cover;
+}
+
+body::-webkit-scrollbar {
+    width: 1em;
+}
+ 
+body::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 0 #222;
+}
+ 
+body::-webkit-scrollbar-thumb {
+  background-color: #222;
+  outline: 0;
+}
+
+div::-webkit-scrollbar {
+    width: 1em;
+}
+ 
+div::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 0 #222;
+}
+ 
+div::-webkit-scrollbar-thumb {
+  background-color: #222;
+  outline: 0;
+}
+
+th {
+    background-color: #222;
+    border-color: #080808;
+    color: #fff;
+}
+
+h3 {
+    text-shadow: 2px 2px 4px #222;
+}
+
+h3 span {
+	cursor:pointer;
+}
+
+/* BOOTSTRAP */
+
+.navbar {
+    background-color: #222;
+    border-radius: 0;
+}
+
+.navbar-inverse .navbar-nav>.active>a {
+    background-color: #fff;
+    color: #555;
+}
+
+.navbar-inverse .navbar-nav>.active>a, .navbar-inverse .navbar-nav>.active>a:focus, .navbar-inverse .navbar-nav>.active>a:hover {
+    background-color: #fff;
+    color: #555;
+}
+
+.panel-info {
+    border-color: #080808;
+    border-radius: 0;
+    box-shadow: 2px 2px 5px #222;
+}
+
+.panel-info>.panel-heading {
+    background-color: #222;
+    border-color: #080808;
+    border-radius: 0;
+    color: #fff;
+}
+
+.panel-info>.panel-footer {
+    background-color: #222;
+    border-color: #080808;
+    border-radius: 0;
+    color: #fff;
+}
+
+.progress {
+    margin: 0;
+    border-radius: 0;
+}
+
+.progress-bar-info {
+    background-color: #222;
+    border-radius: 0;
+}
+
+.page-header>h1 {
+    color: #fff;
+    text-shadow: 2px 2px 4px #222;
+}
+
+.page-header>h1>small {
+    color: #fff;
+    text-shadow: 2px 2px 4px #222;
+}
+
+.form-control {
+	text-overflow: ellipsis;
+}

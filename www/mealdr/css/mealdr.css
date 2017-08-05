@@ -1,0 +1,27 @@
+#context, #context md-content {
+	height: 100%;
+}
+
+.ingredient-list {
+    height: 100px;
+    overflow-y: auto;
+	overflow-x: hidden;
+	word-wrap: normal;
+    padding: 5px;
+}
+
+.instruction-list {
+    height: 100px;
+    overflow-y: auto;
+	overflow-x: hidden;
+	word-wrap: normal;
+    padding: 5px;
+}
+
+.clickable {
+    cursor: pointer;
+}
+
+ul {
+	padding: 0;
+}

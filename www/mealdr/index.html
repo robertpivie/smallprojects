@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        
+        <title>Meal Doctor</title>
+        
+        <!-- Angular -->
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+        <link rel="stylesheet" type="text/css" href="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.css">
+        
+        <!-- Custom CSS -->
+    	<link rel="stylesheet" href="css/mealdr.css">
+
+</head>
+    
+<body ng-app="mealdr" ng-controller="mealdr" ng-cloak>
+
+    <div id="context">
+        <md-content>
+			<div layout="row">
+				<span flex></span>
+				<md-button class="md-primary md-raised" ng-click="showLogin($event)">
+					Login
+				</md-button>
+			</div>
+            <md-tabs md-dynamic-height md-border-bottom>
+                <md-tab label="viewer">
+                    <md-content class="md-padding" layout-xs="column" layout="row">
+                        <div flex-xs="100" flex-md="50" flex-gt-md="33" layout="column" ng-repeat="(name, meal) in meals">
+                            <md-card class="md-whiteframe-5dp">
+                            
+                                <img ng-src="{{ meal.image }}" class="md-card-image">
+                                
+                                <md-card-title>
+                                    <md-card-title-text>
+                                        <span class="md-headline">{{ name }}</span>
+                                    </md-card-title-text>
+                                </md-card-title>
+                                
+                                <md-card-content>
+                                    <ul class="ingredient-list md-whiteframe-1dp">
+                                        <li ng-repeat="ingredient in meal.ingredients">{{ ingredient.amount }} {{ ingredient.name }}</li>
+                                    </ul>
+                                </md-card-content>
+                                
+                                <md-card-actions layout="row" layout-align="end center">
+                                    <md-button>
+                                        <i class="material-icons">get_app</i>
+                                    </md-button>
+                                    <md-button>
+                                        <i class="material-icons">share</i>
+                                    </md-button>
+                                </md-card-actions>
+                                
+                            </md-card>
+                        </div>
+                    </md-content>
+                </md-tab>
+                <md-tab label="editor">
+                    <md-content class="md-padding" layout-xs="column" layout="row">
+                        <div flex-xs="100" flex-md="50" flex-gt-md="33" layout="column">
+							<md-card class="md-whiteframe-5dp">
+								
+								<form>
+							
+									<img ng-src="{{ newMeal.image }}" class="md-card-image">
+									
+									<md-card-title>
+										<md-card-title-text>
+											<md-input-container>
+												<label>Title</label>
+												<input ng-model="newKey">
+											</md-input-container>
+										</md-card-title-text>
+									</md-card-title>
+									
+									<md-card-content>
+										<span><i class="material-icons clickable" ng-click="addIngredient()">add</i>Ingredients</span>
+										<ul class="ingredient-list md-whiteframe-1dp">
+											<li layout-xs="column" layout="row" ng-repeat="ingredient in newMeal.ingredients track by $index">
+												<span>
+													<i class="material-icons clickable" ng-click="removeIngredient($index)">remove</i>
+													<md-input-container flex-xs flex-gt-xs="20">
+														<label>Amount</label>
+														<input ng-model="newMeal.ingredients[$index].amount">
+													</md-input-container>
+													<md-input-container flex-xs flex-gt-xs="80">
+														<label>Ingredient</label>
+														<input ng-model="newMeal.ingredients[$index].name">
+													</md-input-container>
+												</span>
+											</li>
+										</ul>
+									</md-card-content>
+									
+									<md-card-content>
+										<span><i class="material-icons clickable" ng-click="addInstruction()">add</i>Instructions</span>
+										<ul class="instruction-list md-whiteframe-1dp">
+											<li layout-xs="column" layout="row" ng-repeat="instruction in newMeal.instructions track by $index">
+												<span>
+													<i class="material-icons clickable" ng-click="removeInstruction($index)">remove</i>
+													<md-input-container flex-xs flex-gt-xs="100">
+														<label>Instruction</label>
+														<input ng-model="newMeal.instructions[$index].name">
+													</md-input-container>
+												</span>
+											</li>
+										</ul>
+									</md-card-content>
+									
+									<md-card-actions layout="row" layout-align="end center">
+										<md-button ng-click="saveNewMeal()">done</md-button>
+									</md-card-actions>
+									
+								</form>
+								
+							</md-card>
+						</div>
+                    </md-content>
+                </md-tab>
+            </md-tabs>
+        </md-content>
+    </div>
+        
+    <!-- Angular Material -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-animate.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-aria.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.5.3/angular-messages.min.js"></script>
+    
+    <!-- Angular Material -->
+    <script src="http://ajax.googleapis.com/ajax/libs/angular_material/1.1.0-rc2/angular-material.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="./js/mealdr.js"></script>
+        
+</body>
+</html>
