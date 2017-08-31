@@ -1,0 +1,43 @@
+.tagRoot input {
+	width: 100px;
+}
+.tag {
+	width: 50%;
+	float: left;
+	margin-top: 40px;
+	user-select: none;
+}
+.exchanging span {
+	padding: 2px;
+	background-color: gray;
+	color: white;
+	border-radius: 2px;
+}
+
+.card .face .front {
+	height: 100%;
+}
+
+.flip {
+	position: relative;
+}
+.flip .card.flipped {
+	transform: rotatex(-180deg);
+}
+.flip .card {
+	text-align: center;
+	transform-style: preserve-3d;
+	transition: 0.5s;
+}
+.flip .card .face {
+	position: absolute;
+	backface-visibility: hidden;
+	white-space: nowrap;
+}
+.flip .card .back {
+	height: 100%;
+	transform: rotatex(-180deg);
+}
+.flip .fa:hover {
+	cursor: pointer;
+}
