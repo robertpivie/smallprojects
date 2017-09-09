@@ -1,14 +1,16 @@
 <div class="flip">
 	<div class="card" ng-class="{'flipped':tag.isFlipped, 'exchanging':tag.isExchanging}">
 		<span class="face front">
-			<i class="fa fa-exchange" ng-click="exchange(tag)"></i>
-			<i class="fa fa-pencil" ng-click="tag.isFlipped=!tag.isFlipped" ng-hide="source !== null"></i>
+			<a><i class="fa fa-exchange" ng-click="exchange(tag)" ng-hide="source === null"></i></a>
+			<a><i class="fa fa-pencil" ng-click="tag.isFlipped=!tag.isFlipped" ng-hide="source !== null"></i></a>
 			{{ tag.name }}
 		</span>
 		<span class="face back">
-			<i class="fa fa-chain-broken" ng-click="unlink(tag, $parent.$parent.$parent.tag)"></i>
-			<i class="fa fa-check" ng-click="tag.isFlipped=!tag.isFlipped"></i>
+			<a><i class="fa fa-check" ng-click="tag.isFlipped=!tag.isFlipped"></i></a>
 			<input ng-model="tag.name" />
+			<a><i class="fa fa-plus" ng-click="add(tag)" ng-show="tag.left.length===0 || tag.right.length===0"></i></a>
+			<a><i class="fa fa-chain-broken" ng-click="unlinkTag(tag, $parent.$parent.$parent.tag)" ng-show="canUnlinkTag(tag, $parent.$parent.$parent.tag)"></i></a>
+			<a><i class="fa fa-exchange" ng-click="exchange(tag)"></i></a>
 		</span>
 	</div>
 </div>

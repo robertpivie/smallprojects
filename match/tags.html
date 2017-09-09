@@ -1,0 +1,28 @@
+<div ng-controller="tagsCtrl">
+	<div class="toolBar">
+		<!-- download -->
+		<a ng-click="showDownload = true" ng-hide="showDownload">
+			<i class="fa fa-floppy-o"></i>
+		</a>
+		<a ng-click="showDownload = false" ng-show="showDownload">
+			<i class="fa fa-times"></i>
+		</a>
+		<input type="input" id="download" ng-value="downloadName" ng-show="showDownload"></input>
+		<a ng-href="{{download()}}" download="{{tags}}.json" ng-show="showDownload">
+			<i class="fa fa-floppy-o"></i>
+		</a>
+		<!-- divider -->
+		<span class="seperator"></span>
+		<!-- upload -->
+		<a ng-click="showUpload = true" ng-hide="showUpload">
+			<i class="fa fa-folder-open-o"></i>
+		</a>
+		<a ng-click="showUpload = false" ng-show="showUpload">
+			<i class="fa fa-times"></i>
+		</a>
+		<input type="file" id="file" ng-show="showUpload" on-file-change="uploadFile"></input>
+	</div>
+	<div id="tags">
+		<div class="tagRoot" ng-repeat="tag in tags" ng-include="'./tag.html'"></div>
+	</div>
+</div>

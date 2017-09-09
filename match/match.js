@@ -1,91 +1,99 @@
+var app = angular.module('matchApp', ['ui.router']);
 
-var app = angular.module('matchApp', []);
+app.config(function($stateProvider, $urlRouterProvider) {
+
+	$urlRouterProvider.otherwise('/home');
+
+	$stateProvider
+	.state('home', {
+		url: '/home',
+		templateUrl: './home.html'
+	})
+	.state('profile', {
+		url: '/profile',
+		templateUrl: './profile.html'
+	})
+	.state('tags', {
+		url: '/tags',
+		templateUrl: './tags.html'
+	})
+
+});
+
+app.config(['$compileProvider', function ($compileProvider) {
+    $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|data|file|sms|tel):/);
+}]);
+
+app.directive('onFileChange', function() {
+	return {
+		restrict: 'A',
+		link: function (scope, element, attrs) {
+			var onChangeHandler = scope.$eval(attrs.onFileChange);
+			element.bind('change', onChangeHandler);
+		}
+	};
+});
 
 app.controller('tagsCtrl', ['$scope','$http', function($scope, $http) {
 
-	$http.get('./tags.json')
-	.success(function(successData){
-		$scope.tags = successData;
-	})
-	.error(function(error){
-		console.log(error);
-	});
+	$scope.tags = [{"name":"edit me", "left":[], "right":[]}];
+
+	$scope.add = function(tag) {
+		if (tag.left.length === 0) {//add left
+			tag.left.push({"name":"edit me", "left":[], "right":[]});
+		} else if (tag.right.length === 0) {//add right
+			tag.right.push({"name":"edit me", "left":[], "right":[]});
+		}
+	};
 
 	$scope.source = null;
 	$scope.exchange = function(tag) {
 		if ($scope.source === null) {
 			tag.isExchanging = !tag.isExchanging;//change styles
 			$scope.source = tag;//store
-		} else {
-			//swap
+		} else {//swap
 			var target = tag.name;//get target
 			var temporary = $scope.source.name;
 			$scope.source.name = target;
 			tag.name = temporary;
-			//change styles
-			$scope.source.isExchanging = !$scope.source.isExchanging;
-			//reset
-			$scope.source = null;
+			$scope.source.isExchanging = !$scope.source.isExchanging;//change styles
+			$scope.source = null;//reset
 		}
+	};
+
+	$scope.canUnlinkTag = function(tag, parent) {
+		return typeof parent !== "undefined";
 	}
-	$scope.unlink = function(tag, parent) {
-		function deleteLeft(parent, tag) {
-			//a more civilized weapon for deleting to the left
-			function rightMost(parent, tag) {
-				if (tag.right.length === 0 && tag.left.length === 0) {
-					return tag;
-				} else if (tag.left.length !== 0 && tag.right.length === 0) {
-					return rightMost(tag, tag.left[0]);
-				} else {
-					return rightMost(tag, tag.right[0]);
-				}
-			}
-
-			if (tag.left.length === 0 && tag.right.length === 0) {//remove left
-				parent.left = [];
-			} else if (tag.left.length === 0 && tag.right.length !== 0) {//place right in parent left
-				parent.left = tag.right;
-			} else if (tag.left.length !== 0 && tag.right.length === 0) {//place left in parent left
-				parent.left = tag.left;
-			} else {//make right most
-				parent.left.name = rightMost(tag, tag.left[0]).name;
-			}
+	$scope.unlinkTag = function(tag, parent) {
+		if (parent.left[0] === tag) {//unlink left
+			parent.left = [];
+		} else if (parent.right[0] === tag) {//unlink right
+			parent.right = [];
 		}
+	};
 
-		//a more civilized weapon for deleting to the right
-		function deleteRight(parent, tag) {
-			function leftMost(parent, tag) {
-				if (tag.right.length === 0 && tag.left.length === 0) {
-					return tag;
-				} else if (tag.left.length === 0 && tag.right.length !== 0) {
-					return leftMost(tag, tag.right[0]);
-				} else {
-					return leftMost(tag, tag.left[0]);
-				}
-			}
+	$scope.downloadName = "tags"
+	$scope.showDownload = false;
+	$scope.download = function() {
+		return "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify($scope.tags));
+	}
 
-			if (tag.left.length === 0 && tag.right.length === 0) {//remove left
-				parent.right = [];
-			} else if (tag.left.length === 0 && tag.right.length !== 0) {//place right in parent left
-				parent.right = tag.right;
-			} else if (tag.left.length !== 0 && tag.right.length === 0) {//place left in parent left
-				parent.right = tag.left;
-			} else {//make right most
-				parent.right.name = leftMost(tag, tag.right[0]).name;
-			}
-		}
-
+	$scope.showUpload = false;
+	$scope.uploadFile = function() {
 		try {
-			console.log('parent:'+JSON.stringify(parent));
-			console.log('tag:'+JSON.stringify(tag));
-			if (parent.left[0] === tag) {//deleting a left
-					parent.left = [];
-			} else if (parent.right[0] === tag) {//deleting a right
-					parent.right = [];
+			var file = document.getElementById('file').files[0];
+
+			var reader = new FileReader();
+
+			reader.onloadend = function(e) {
+				$scope.tags = JSON.parse(e.target.result);
+				$scope.showUpload = false;
+				$scope.$apply();
 			}
+
+			reader.readAsBinaryString(file);
 		} catch (e) {
-			console.log(e);
-			alert('this can\'t be unlinked');
+			alert(e);
 		}
 	}
 }]);
