@@ -1,1 +1,1 @@
-[{"name":"1", "left":[{"name":"2", "left":[{"name":"3", "left":{}, "right":[]}], "right":[]}], "right":[{"name":"4", "left":{}, "right":[]}]}]
+[{"name":"1", "left":[{"name":"2", "left":[{"name":"3", "left":[], "right":[]}], "right":[]}], "right":[{"name":"4", "left":{}, "right":[]}]}]

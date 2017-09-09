@@ -8,16 +8,21 @@
 	user-select: none;
 }
 .exchanging span {
-	padding: 2px;
 	background-color: gray;
 	color: white;
 	border-radius: 2px;
 }
 
+.card span {
+	padding: 2px;
+	border: 1px solid black;
+}
+.card.flipped span {
+	border: 0;
+}
 .card .face .front {
 	height: 100%;
 }
-
 .flip {
 	position: relative;
 }
