@@ -11,6 +11,8 @@
 		<div class="toolBar">
 			<i class="fa fa-plus" ng-click="addTag()"></i>
 		</div>
-		<div class="tagRoot" ng-repeat="tag in tags" ng-init="parent = null" ng-include="'./tag.html'"></div>
+		<div id="tags">
+			<div class="tagRoot" ng-repeat="tag in tags" ng-include="'./tag.html'"></div>
+		</div>
     </body>
 </html>

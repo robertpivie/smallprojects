@@ -28,7 +28,7 @@ app.controller('tagsCtrl', ['$scope','$http', function($scope, $http) {
 			$scope.source = null;
 		}
 	}
-	$scope.unlink = function(parent, tag) {
+	$scope.unlink = function(tag, parent) {
 		function deleteLeft(parent, tag) {
 			//a more civilized weapon for deleting to the left
 			function rightMost(parent, tag) {
@@ -76,8 +76,8 @@ app.controller('tagsCtrl', ['$scope','$http', function($scope, $http) {
 		}
 
 		try {
-			console.log('parent:'+parent);
-			console.log('tag:'+tag);
+			console.log('parent:'+JSON.stringify(parent));
+			console.log('tag:'+JSON.stringify(tag));
 			if (parent.left[0] === tag) {//deleting a left
 					parent.left = [];
 			} else if (parent.right[0] === tag) {//deleting a right
@@ -85,7 +85,7 @@ app.controller('tagsCtrl', ['$scope','$http', function($scope, $http) {
 			}
 		} catch (e) {
 			console.log(e);
-			alert('this node cannot be unlinked');
+			alert('this can\'t be unlinked');
 		}
 	}
 }]);
